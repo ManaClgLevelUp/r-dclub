@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .expertise-cell span {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 15px;
+            margin: 2px;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+        }
+
+        .social-link {
+            color: #2196F3;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .social-link:hover {
+            text-decoration: underline;
+        }
+
+        .social-icon {
+            font-size: 16px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        .edit-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 30px auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #2196F3;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 20px;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .modal-content input[type="text"],
+        .modal-content input[type="email"],
+        .modal-content input[type="url"],
+        .modal-content select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            border-color: #2196F3;
+            outline: none;
+            box-shadow: 0 0 5px rgba(33, 150, 243, 0.2);
+        }
+
+        .modal-content .radio-group,
+        .modal-content .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .modal-content .radio-option,
+        .modal-content .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-radius: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .modal-content .radio-option:hover,
+        .modal-content .checkbox-option:hover {
+            background: #e3f2fd;
+        }
+
+        .modal-content .submit-btn {
+            background: #2196F3;
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .modal-content .submit-btn:hover {
+            background: #1976D2;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            background: none;
+            border: none;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-btn:hover {
+            color: #f44336;
+            background: #f5f5f5;
+        }
+
+        /* Scrollbar styling */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 100px auto;
+        }
+
+        .auth-container h1 {
+            margin-bottom: 30px;
+            color: #2196F3;
+            font-size: 28px;
+        }
+
+        .auth-container .form-group {
+            margin-bottom: 20px;
+        }
+
+        .auth-container input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .auth-container input:focus {
+            border-color: #2196F3;
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #1976D2;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginContainer" class="container">
+        <div class="auth-container">
+            <h1>Admin Login</h1>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" value="">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter admin password" required>
+                    <!-- <small style="color: #666; display: block; margin-top: 5px;">Default password: manaclglevelup9692</small> -->
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+                <div id="loginMessage"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboardContainer" class="container" style="display: none;">
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="yearFilter">Filter by Year</label>
+                <select id="yearFilter" onchange="applyFilters()">
+                    <option value="">All Years</option>
+                    <option value="1st">1st Year</option>
+                    <option value="2nd">2nd Year</option>
+                    <option value="3rd">3rd Year</option>
+                    <option value="4th">4th Year</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="branchFilter">Filter by Branch</label>
+                <select id="branchFilter" onchange="applyFilters()">
+                    <option value="">All Branches</option>
+                    <option value="AIDS">AIDS</option>
+                    <option value="CSD">CSD</option>
+                    <option value="AIML">AIML</option>
+                    <option value="CSC">CSC</option>
+                    <option value="CSM">CSM</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="expertiseFilter">Filter by Expertise</label>
+                <select id="expertiseFilter" onchange="applyFilters()">
+                    <option value="">All Expertise</option>
+                    <option value="AI&ML">AI&ML</option>
+                    <option value="DS">DS</option>
+                    <option value="Full Stack">Full Stack</option>
+                    <option value="IoT">IoT</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Roll Number</th>
+                        <th>Email</th>
+                        <th>LinkedIn</th>
+                        <th>Year</th>
+                        <th>Branch</th>
+                        <th>Gender</th>
+                        <th>Student Type</th>
+                        <th>Expertise</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr>
+                        <td colspan="10" class="loading">Loading student data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Student Details</h2>
+            <form id="editForm" onsubmit="handleEdit(event)">
+                <input type="hidden" id="editStudentId">
+                
+                <div class="form-group">
+                    <label for="editName">Full Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editYear">Year</label>
+                    <select id="editYear" required>
+                        <option value="">Select Year</option>
+                        <option value="1st">1st Year</option>
+                        <option value="2nd">2nd Year</option>
+                        <option value="3rd">3rd Year</option>
+                        <option value="4th">4th Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editBranch">Branch</label>
+                    <select id="editBranch" required>
+                        <option value="">Select Branch</option>
+                        <option value="AIDS">AIDS</option>
+                        <option value="CSD">CSD</option>
+                        <option value="AIML">AIML</option>
+                        <option value="CSC">CSC</option>
+                        <option value="CSM">CSM</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editRollNumber">Roll Number</label>
+                    <input type="text" id="editRollNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editEmail">Email Address</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editLinkedin">LinkedIn Profile</label>
+                    <input type="url" id="editLinkedin">
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="editMale" name="editGender" value="male" required>
+                            <label for="editMale">Male</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="editFemale" name="editGender" value="female">
+                            <label for="editFemale">Female</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Student Type</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="editHostel" name="editStudentType" value="hostel" required>
+                            <label for="editHostel">Hostel</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="editDayScholar" name="editStudentType" value="dayScholar">
+                            <label for="editDayScholar">Day Scholar</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Expertise In</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="editAiml" name="editExpertise" value="AI&ML">
+                            <label for="editAiml">AI&ML</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="editDs" name="editExpertise" value="DS">
+                            <label for="editDs">DS</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="editFullStack" name="editExpertise" value="Full Stack">
+                            <label for="editFullStack">Full Stack</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="editIot" name="editExpertise" value="IoT">
+                            <label for="editIot">IoT</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLQpU3NsGEYPMrzoYre-7Fq6FcsifmlmE",
+            authDomain: "rndc-2eb28.firebaseapp.com",
+            projectId: "rndc-2eb28",
+            storageBucket: "rndc-2eb28.firebasestorage.app",
+            messagingSenderId: "63014323819",
+            appId: "1:63014323819:web:d242bce1dd424df914932e",
+            measurementId: "G-32H560QS39"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            // Hardcoded admin credentials check
+            if (email === 'manaclglevelup@gmail.com' && password === 'manaclglevelup9692') {
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('dashboardContainer').style.display = 'block';
+                    loadStudentData();
+                } catch (error) {
+                    messageDiv.textContent = "Authentication error. Please try again.";
+                    messageDiv.className = 'error-message';
+                }
+            } else {
+                messageDiv.textContent = "Invalid credentials";
+                messageDiv.className = 'error-message';
+            }
+        }
+
+        async function loadStudentData() {
+            try {
+                const snapshot = await db.collection('students').orderBy('timestamp', 'desc').get();
+                const students = snapshot.docs.map(doc => ({...doc.data(), id: doc.id}));
+                allStudents = students;
+                displayStudents(students);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function setupRealtimeUpdates() {
+            db.collection('students').onSnapshot(snapshot => {
+                loadStudentData();
+            });
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                loadStudentData();
+                setupRealtimeUpdates();
+            } else {
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('dashboardContainer').style.display = 'none';
+            }
+        });
+
+        let allStudents = [];
+
+        function applyFilters() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const branchFilter = document.getElementById('branchFilter').value;
+            const expertiseFilter = document.getElementById('expertiseFilter').value;
+
+            let filteredStudents = allStudents;
+
+            if (yearFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.year === yearFilter
+                );
+            }
+
+            if (branchFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.branch === branchFilter
+                );
+            }
+
+            if (expertiseFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.expertise && student.expertise.includes(expertiseFilter)
+                );
+            }
+
+            displayStudents(filteredStudents);
+        }
+
+        function displayStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="10" style="text-align: center;">
+                        No students found matching the selected filters.
+                    </td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.name}</td>
+                    <td>${student.rollNumber}</td>
+                    <td><a href="mailto:${student.email}">${student.email}</a></td>
+                    <td>${student.linkedin ? 
+                        `<a href="${student.linkedin}" target="_blank" class="social-link">
+                            <i class="social-icon">💼</i> View Profile
+                         </a>` : 'N/A'
+                    }</td>
+                    <td>${student.year}</td>
+                    <td>${student.branch}</td>
+                    <td>${student.gender}</td>
+                    <td>${student.studentType}</td>
+                    <td class="expertise-cell">
+                        ${student.expertise ? student.expertise.map(exp => 
+                            <span>${exp}</span>
+                        ).join('') : ''}
+                    </td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="openEditModal('${student.id}')">Edit</button>
+                        <button class="action-btn delete-btn" onclick="confirmDelete('${student.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleLogout() {
+            auth.signOut()
+                .then(() => {
+                    window.location.href = 'index.html';
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                });
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                loadStudentData();
+            }
+        });
+
+        db.collection('studentDetails').onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added' || change.type === 'modified' || change.type === 'removed') {
+                    loadStudentData();
+                }
+            });
+        });
+
+        function openEditModal(studentId) {
+            const student = allStudents.find(s => s.id === studentId);
+            if (!student) return;
+
+            // Set all form values
+            document.getElementById('editStudentId').value = studentId;
+            document.getElementById('editName').value = student.name;
+            document.getElementById('editYear').value = student.year;
+            document.getElementById('editBranch').value = student.branch;
+            document.getElementById('editRollNumber').value = student.rollNumber;
+            document.getElementById('editEmail').value = student.email;
+            document.getElementById('editLinkedin').value = student.linkedin || '';
+            
+            // Set radio buttons
+            document.querySelector(input[name="editGender"][value="${student.gender}"]).checked = true;
+            document.querySelector(input[name="editStudentType"][value="${student.studentType}"]).checked = true;
+            
+            // Set checkboxes
+            document.querySelectorAll('input[name="editExpertise"]').forEach(checkbox => {
+                checkbox.checked = student.expertise && student.expertise.includes(checkbox.value);
+            });
+
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function handleEdit(event) {
+            event.preventDefault();
+            const studentId = document.getElementById('editStudentId').value;
+
+            try {
+                const updatedData = {
+                    name: document.getElementById('editName').value,
+                    year: document.getElementById('editYear').value,
+                    branch: document.getElementById('editBranch').value,
+                    rollNumber: document.getElementById('editRollNumber').value,
+                    email: document.getElementById('editEmail').value,
+                    linkedin: document.getElementById('editLinkedin').value,
+                    gender: document.querySelector('input[name="editGender"]:checked').value,
+                    studentType: document.querySelector('input[name="editStudentType"]:checked').value,
+                    expertise: Array.from(document.querySelectorAll('input[name="editExpertise"]:checked'))
+                        .map(cb => cb.value),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('students').doc(studentId).update(updatedData);
+                closeEditModal();
+                loadStudentData();
+            } catch (error) {
+                console.error('Error updating student:', error);
+                alert('Error updating student details');
+            }
+        }
+
+        function confirmDelete(studentId) {
+            if (confirm('Are you sure you want to delete this student record?')) {
+                deleteStudent(studentId);
+            }
+        }
+
+        async function deleteStudent(studentId) {
+            try {
+                await db.collection('students').doc(studentId).delete();
+                loadStudentData();
+            } catch (error) {
+                console.error('Error deleting student:', error);
+                alert('Error deleting student record');
+            }
+        }
+    </script>
+</body>
+</html>

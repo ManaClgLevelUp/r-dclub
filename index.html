@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Details Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        select {
+            background-color: white;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .admin-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .error {
+            background: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .radio-group,
+            .checkbox-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .social-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .social-input:focus {
+            border-color: #2196F3;
+            outline: none;
+            box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+        }
+
+        .social-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .social-container {
+            position: relative;
+        }
+
+        .social-container input {
+            padding-left: 35px;
+        }
+    </style>
+</head>
+<body>
+    <button class="admin-btn" onclick="window.location.href='admin.html'">Admin Login</button>
+    
+    <div class="container">
+        <h1>Student Details Form</h1>
+        <form id="studentForm" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="year">Year</label>
+                <select id="year" required>
+                    <option value="">Select Year</option>
+                    <option value="1st">1st Year</option>
+                    <option value="2nd">2nd Year</option>
+                    <option value="3rd">3rd Year</option>
+                    <option value="4th">4th Year</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="branch">Branch</label>
+                <select id="branch" required>
+                    <option value="">Select Branch</option>
+                    <option value="AIDS">AIDS</option>
+                    <option value="CSD">CSD</option>
+                    <option value="AIML">AIML</option>
+                    <option value="CSC">CSC</option>
+                    <option value="CSM">CSM</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rollNumber">Roll Number</label>
+                <input type="text" id="rollNumber" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="social-container">
+                    <i class="social-icon">📧</i>
+                    <input type="email" id="email" class="social-input" 
+                           placeholder="your.email@example.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="linkedin">LinkedIn Profile</label>
+                <div class="social-container">
+                    <i class="social-icon">💼</i>
+                    <input type="url" id="linkedin" class="social-input"
+                           placeholder="https://www.linkedin.com/in/your-profile">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="male" name="gender" value="male" required>
+                        <label for="male">Male</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="female" name="gender" value="female">
+                        <label for="female">Female</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Student Type</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="hostel" name="studentType" value="hostel" required>
+                        <label for="hostel">Hostel</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="dayScholar" name="studentType" value="dayScholar">
+                        <label for="dayScholar">Day Scholar</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Expertise In</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="aiml" name="expertise" value="AI&ML">
+                        <label for="aiml">AI&ML</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="ds" name="expertise" value="DS">
+                        <label for="ds">DS</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="fullStack" name="expertise" value="Full Stack">
+                        <label for="fullStack">Full Stack</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="iot" name="expertise" value="IoT">
+                        <label for="iot">IoT</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLQpU3NsGEYPMrzoYre-7Fq6FcsifmlmE",
+            authDomain: "rndc-2eb28.firebaseapp.com",
+            projectId: "rndc-2eb28",
+            storageBucket: "rndc-2eb28.firebasestorage.app",
+            messagingSenderId: "63014323819",
+            appId: "1:63014323819:web:d242bce1dd424df914932e"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+
+            try {
+                const formData = {
+                    name: document.getElementById('name').value,
+                    year: document.getElementById('year').value,
+                    branch: document.getElementById('branch').value,
+                    rollNumber: document.getElementById('rollNumber').value,
+                    email: document.getElementById('email').value,
+                    linkedin: document.getElementById('linkedin').value || '',
+                    gender: document.querySelector('input[name="gender"]:checked').value,
+                    studentType: document.querySelector('input[name="studentType"]:checked').value,
+                    expertise: Array.from(document.querySelectorAll('input[name="expertise"]:checked'))
+                        .map(cb => cb.value),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('students').add(formData);
+                
+                messageDiv.textContent = 'Details saved successfully!';
+                messageDiv.className = 'message success';
+                document.getElementById('studentForm').reset();
+
+            } catch (error) {
+                messageDiv.textContent = error.message;
+                messageDiv.className = 'message error';
+            }
+        }
+    </script>
+</body>
+</html>
