@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -89,7 +90,8 @@
             min-width: 800px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -173,7 +175,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
 
@@ -185,7 +187,7 @@
             width: 90%;
             max-width: 600px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -366,8 +368,74 @@
             margin-top: 15px;
             text-align: center;
         }
+
+        /* Add these new styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2196F3;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #2196F3;
+            outline: none;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .download-btn:hover {
+            background: #45a049;
+        }
     </style>
 </head>
+
 <body>
     <div id="loginContainer" class="container">
         <div class="auth-container">
@@ -375,12 +443,12 @@
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" value="">
+                    <input type="email" id="email" placeholder="Enter admin email" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" placeholder="Enter admin password" required>
-                    <!-- <small style="color: #666; display: block; margin-top: 5px;">Default password: manaclglevelup9692</small> -->
+
                 </div>
                 <button type="submit" class="submit-btn">Login</button>
                 <div id="loginMessage"></div>
@@ -391,7 +459,18 @@
     <div id="dashboardContainer" class="container" style="display: none;">
         <div class="dashboard-header">
             <h1>Admin Dashboard</h1>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            <div>
+                <button class="download-btn" onclick="downloadExcel()">Download Excel</button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" 
+                   id="searchInput" 
+                   class="search-input" 
+                   placeholder="Search by name, roll number, or email..."
+                   onkeyup="handleSearch()">
         </div>
 
         <div class="filters">
@@ -434,6 +513,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>S.No</th>
                         <th>Name</th>
                         <th>Roll Number</th>
                         <th>Email</th>
@@ -461,7 +541,7 @@
             <h2>Edit Student Details</h2>
             <form id="editForm" onsubmit="handleEdit(event)">
                 <input type="hidden" id="editStudentId">
-                
+
                 <div class="form-group">
                     <label for="editName">Full Name</label>
                     <input type="text" id="editName" required>
@@ -560,9 +640,14 @@
         </div>
     </div>
 
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -580,36 +665,67 @@
         const db = firebase.firestore();
 
         async function handleLogin(event) {
-            event.preventDefault();
+            event.preventDefault();  // This needs to work properly
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
+            const loginForm = document.getElementById('loginForm');
 
-            // Hardcoded admin credentials check
-            if (email === 'manaclglevelup@gmail.com' && password === 'manaclglevelup9692') {
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                if (user) {
+                    // Clear the form
+                    loginForm.reset();
+                    
+                    // Show dashboard
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('dashboardContainer').style.display = 'block';
-                    loadStudentData();
-                } catch (error) {
-                    messageDiv.textContent = "Authentication error. Please try again.";
-                    messageDiv.className = 'error-message';
+                    
+                    // Load the data
+                    await loadStudentData();
+                    setupRealtimeUpdates();
+                    
+                    // Clear any error messages
+                    messageDiv.textContent = '';
+                    messageDiv.className = '';
                 }
-            } else {
-                messageDiv.textContent = "Invalid credentials";
+            } catch (error) {
+                let errorMessage = "Authentication failed. Please try again.";
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = "No user found with this email.";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = "Invalid password.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Invalid email format.";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = "Too many failed attempts. Please try again later.";
+                        break;
+                }
+
+                messageDiv.textContent = errorMessage;
                 messageDiv.className = 'error-message';
+                console.error('Login error:', error);
             }
         }
 
         async function loadStudentData() {
+            showLoading();
             try {
                 const snapshot = await db.collection('students').orderBy('timestamp', 'desc').get();
-                const students = snapshot.docs.map(doc => ({...doc.data(), id: doc.id}));
+                const students = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
                 allStudents = students;
                 displayStudents(students);
             } catch (error) {
                 console.error('Error loading data:', error);
+            } finally {
+                hideLoading();
             }
         }
 
@@ -621,11 +737,13 @@
 
         auth.onAuthStateChanged(user => {
             if (user) {
+                // User is signed in
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('dashboardContainer').style.display = 'block';
                 loadStudentData();
                 setupRealtimeUpdates();
             } else {
+                // User is signed out
                 document.getElementById('loginContainer').style.display = 'block';
                 document.getElementById('dashboardContainer').style.display = 'none';
             }
@@ -641,19 +759,19 @@
             let filteredStudents = allStudents;
 
             if (yearFilter) {
-                filteredStudents = filteredStudents.filter(student => 
+                filteredStudents = filteredStudents.filter(student =>
                     student.year === yearFilter
                 );
             }
 
             if (branchFilter) {
-                filteredStudents = filteredStudents.filter(student => 
+                filteredStudents = filteredStudents.filter(student =>
                     student.branch === branchFilter
                 );
             }
 
             if (expertiseFilter) {
-                filteredStudents = filteredStudents.filter(student => 
+                filteredStudents = filteredStudents.filter(student =>
                     student.expertise && student.expertise.includes(expertiseFilter)
                 );
             }
@@ -661,20 +779,31 @@
             displayStudents(filteredStudents);
         }
 
+        function handleSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredStudents = allStudents.filter(student => 
+                student.name?.toLowerCase().includes(searchTerm) ||
+                student.rollNumber?.toLowerCase().includes(searchTerm) ||
+                student.email?.toLowerCase().includes(searchTerm)
+            );
+            displayStudents(filteredStudents);
+        }
+
         function displayStudents(students) {
             const tbody = document.getElementById('studentsTableBody');
-            
+
             if (students.length === 0) {
                 tbody.innerHTML = `
-                    <tr><td colspan="10" style="text-align: center;">
+                    <tr><td colspan="11" style="text-align: center;">
                         No students found matching the selected filters.
                     </td></tr>
                 `;
                 return;
             }
 
-            tbody.innerHTML = students.map(student => `
+            tbody.innerHTML = students.map((student, index) => `
                 <tr>
+                    <td>${index + 1}</td>
                     <td>${student.name}</td>
                     <td>${student.rollNumber}</td>
                     <td><a href="mailto:${student.email}">${student.email}</a></td>
@@ -689,7 +818,7 @@
                     <td>${student.studentType}</td>
                     <td class="expertise-cell">
                         ${student.expertise ? student.expertise.map(exp => 
-                            <span>${exp}</span>
+                            `<span>${exp}</span>`
                         ).join('') : ''}
                     </td>
                     <td>
@@ -698,6 +827,14 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
         }
 
         function handleLogout() {
@@ -738,11 +875,11 @@
             document.getElementById('editRollNumber').value = student.rollNumber;
             document.getElementById('editEmail').value = student.email;
             document.getElementById('editLinkedin').value = student.linkedin || '';
-            
-            // Set radio buttons
-            document.querySelector(input[name="editGender"][value="${student.gender}"]).checked = true;
-            document.querySelector(input[name="editStudentType"][value="${student.studentType}"]).checked = true;
-            
+
+            // Fix: Correctly set radio buttons
+            document.querySelector(`input[name="editGender"][value="${student.gender}"]`).checked = true;
+            document.querySelector(`input[name="editStudentType"][value="${student.studentType}"]`).checked = true;
+
             // Set checkboxes
             document.querySelectorAll('input[name="editExpertise"]').forEach(checkbox => {
                 checkbox.checked = student.expertise && student.expertise.includes(checkbox.value);
@@ -798,6 +935,35 @@
                 alert('Error deleting student record');
             }
         }
+
+        function downloadExcel() {
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Prepare data for export
+            const exportData = allStudents.map((student, index) => ({
+                'S.No': index + 1,
+                'Name': student.name,
+                'Roll Number': student.rollNumber,
+                'Email': student.email,
+                'LinkedIn': student.linkedin || 'N/A',
+                'Year': student.year,
+                'Branch': student.branch,
+                'Gender': student.gender,
+                'Student Type': student.studentType,
+                'Expertise': student.expertise ? student.expertise.join(', ') : ''
+            }));
+
+            // Convert data to worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, "Students");
+
+            // Generate Excel file and trigger download
+            XLSX.writeFile(wb, `Students_Data_${new Date().toLocaleDateString()}.xlsx`);
+        }
     </script>
 </body>
+
 </html>
